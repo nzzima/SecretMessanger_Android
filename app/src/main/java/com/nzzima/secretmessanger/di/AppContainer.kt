@@ -3,6 +3,7 @@ package com.nzzima.secretmessanger.di
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
+import com.nzzima.secretmessanger.data.account.AccountAuthenticator
 import com.nzzima.secretmessanger.data.account.FirebaseAccountRepository
 import com.nzzima.secretmessanger.data.account.FirestoreLoginRegistry
 import com.nzzima.secretmessanger.data.profile.FirestoreProfileRepository
@@ -30,6 +31,8 @@ class AppContainer {
     val sessionReader: SessionReader get() = sessionRepository
 
     val sessionCloser: SessionCloser get() = sessionRepository
+
+    val authenticator: AccountAuthenticator get() = accountRepository
 
     val registerAccount by lazy { RegisterAccount(accountRepository, loginRegistry, profileRepository) }
 }

@@ -1,21 +1,37 @@
 package com.nzzima.secretmessanger.domain
 
+import com.nzzima.secretmessanger.data.account.AccountAuthenticator
+import com.nzzima.secretmessanger.data.account.AccountFailure
 import com.nzzima.secretmessanger.data.account.AccountRegistrar
 import com.nzzima.secretmessanger.data.account.LoginAvailability
 import com.nzzima.secretmessanger.data.account.LoginRegistry
 import com.nzzima.secretmessanger.data.profile.ProfileWriter
 
-/** [AccountRegistrar] в памяти. [registerFails] задаёт отказ создания аккаунта. */
+/**
+ * [AccountRegistrar] и [AccountAuthenticator] в памяти.
+ *
+ * [registerFails] задаёт отказ создания аккаунта, [knownCredentials] — пару «почта к
+ * паролю», которую примет [signIn]; любая другая пара даёт
+ * [AccountFailure.WrongCredentials].
+ */
 class FakeAccountRegistrar(
     private val uid: String = "uid-1",
     private val registerFails: Throwable? = null,
-) : AccountRegistrar {
+    private val knownCredentials: Pair<String, String>? = null,
+) : AccountRegistrar, AccountAuthenticator {
 
     var deleted = false
         private set
 
     override suspend fun register(email: String, password: String): Result<String> =
         registerFails?.let { Result.failure(it) } ?: Result.success(uid)
+
+    override suspend fun signIn(email: String, password: String): Result<String> =
+        if (knownCredentials == Pair(email, password)) {
+            Result.success(uid)
+        } else {
+            Result.failure(AccountFailure.WrongCredentials)
+        }
 
     override suspend fun deleteCurrent(): Result<Unit> {
         deleted = true

@@ -48,7 +48,7 @@ fun AppNavHost(
     ) {
         composable(Destination.Auth.route) {
             val authViewModel: AuthViewModel = viewModel(
-                factory = viewModelFactory { initializer { AuthViewModel(container.registerAccount) } },
+                factory = viewModelFactory { initializer { AuthViewModel(container.registerAccount, container.authenticator) } },
             )
             AuthScreen(viewModel = authViewModel)
         }

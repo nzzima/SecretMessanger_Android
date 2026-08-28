@@ -2,6 +2,7 @@ package com.nzzima.secretmessanger.ui.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nzzima.secretmessanger.data.account.AccountAuthenticator
 import com.nzzima.secretmessanger.domain.RegisterAccount
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -12,13 +13,13 @@ import kotlinx.coroutines.launch
 /**
  * Состояние экрана входа и обработка ввода.
  *
- * Успешная регистрация открывает сессию; переход на следующий экран выполняет навигация по
- * изменению [com.nzzima.secretmessanger.data.session.SessionReader.session].
- *
- * Режим [AuthUiState.Mode.SignIn] отправку не выполняет.
+ * Успешный вход или регистрация открывают сессию; переход на следующий экран выполняет
+ * навигация по изменению
+ * [com.nzzima.secretmessanger.data.session.SessionReader.session].
  */
 class AuthViewModel(
     private val registerAccount: RegisterAccount,
+    private val authenticator: AccountAuthenticator,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(AuthUiState())
@@ -43,21 +44,21 @@ class AuthViewModel(
     }
 
     /**
-     * Запускает регистрацию, если [AuthUiState.canSubmit] истинно и режим —
-     * [AuthUiState.Mode.Register]. Отказ попадает в [AuthUiState.error].
+     * Запускает вход или регистрацию по текущему [AuthUiState.mode], если
+     * [AuthUiState.canSubmit] истинно. Отказ попадает в [AuthUiState.error].
      */
     fun onSubmit() {
         val state = _uiState.value
-        if (!state.canSubmit || state.mode != AuthUiState.Mode.Register) return
+        if (!state.canSubmit) return
 
         _uiState.update { it.copy(isSubmitting = true, error = null) }
         viewModelScope.launch {
-            val result = registerAccount(state.email, state.password, state.login)
+            val result = when (state.mode) {
+                AuthUiState.Mode.SignIn -> authenticator.signIn(state.email, state.password)
+                AuthUiState.Mode.Register -> registerAccount(state.email, state.password, state.login)
+            }
             _uiState.update { current ->
-                current.copy(
-                    isSubmitting = false,
-                    error = result.exceptionOrNull()?.message,
-                )
+                current.copy(isSubmitting = false, error = result.exceptionOrNull()?.message)
             }
         }
     }

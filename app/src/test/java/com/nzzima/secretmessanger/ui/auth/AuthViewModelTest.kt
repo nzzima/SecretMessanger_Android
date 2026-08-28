@@ -31,7 +31,7 @@ class AuthViewModelTest {
         registrar: FakeAccountRegistrar = FakeAccountRegistrar(),
         registry: FakeLoginRegistry = FakeLoginRegistry(),
         profiles: FakeProfileWriter = FakeProfileWriter(),
-    ) = AuthViewModel(RegisterAccount(registrar, registry, profiles))
+    ) = AuthViewModel(RegisterAccount(registrar, registry, profiles), registrar)
 
     @Test
     fun `отправка недоступна при коротком пароле`() {
@@ -101,16 +101,42 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `в режиме входа отправка ничего не запускает`() = runTest(dispatcher) {
+    fun `вход с верной парой проходит и не оставляет ошибки`() = runTest(dispatcher) {
         val profiles = FakeProfileWriter()
-        val model = viewModel(profiles = profiles)
+        val model = viewModel(
+            registrar = FakeAccountRegistrar(knownCredentials = "a@b.c" to "123456"),
+            profiles = profiles,
+        )
 
         model.onEmailChange("a@b.c")
         model.onPasswordChange("123456")
         model.onSubmit()
         dispatcher.scheduler.advanceUntilIdle()
 
-        assertNull(profiles.created)
+        assertNull(model.uiState.value.error)
         assertFalse(model.uiState.value.isSubmitting)
+        assertNull("вход профиль не пишет", profiles.created)
+    }
+
+    @Test
+    fun `неверная пара показывается одним отказом`() = runTest(dispatcher) {
+        val model = viewModel(registrar = FakeAccountRegistrar(knownCredentials = "a@b.c" to "123456"))
+
+        model.onEmailChange("a@b.c")
+        model.onPasswordChange("неверный")
+        model.onSubmit()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("Неверная почта или пароль", model.uiState.value.error)
+    }
+
+    @Test
+    fun `в режиме входа логин не требуется`() {
+        val model = viewModel()
+
+        model.onEmailChange("a@b.c")
+        model.onPasswordChange("123456")
+
+        assertTrue(model.uiState.value.canSubmit)
     }
 }
