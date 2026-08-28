@@ -1,0 +1,17 @@
+# Локальные пути SDK — у каждой машины свои
+local.properties
+
+# Сборка и кэши
+.gradle/
+build/
+app/build/
+.kotlin/
+*.apk
+*.aab
+
+# Android Studio / IntelliJ: проект открывается из Gradle-файлов
+.idea/
+*.iml
+captures/
+
+.DS_Store
