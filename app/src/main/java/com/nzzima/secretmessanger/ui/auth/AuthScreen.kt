@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -19,13 +20,12 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 
 /** Экран входа и регистрации. */
 @Composable
 fun AuthScreen(
+    viewModel: AuthViewModel,
     modifier: Modifier = Modifier,
-    viewModel: AuthViewModel = viewModel(),
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
@@ -35,6 +35,7 @@ fun AuthScreen(
         onPasswordChange = viewModel::onPasswordChange,
         onLoginChange = viewModel::onLoginChange,
         onModeToggle = viewModel::onModeToggle,
+        onSubmit = viewModel::onSubmit,
         modifier = modifier,
     )
 }
@@ -47,6 +48,7 @@ private fun AuthScreen(
     onPasswordChange: (String) -> Unit,
     onLoginChange: (String) -> Unit,
     onModeToggle: () -> Unit,
+    onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
     Column(
@@ -89,8 +91,12 @@ private fun AuthScreen(
             Text(message, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall)
         }
 
-        Button(onClick = {}, enabled = uiState.canSubmit, modifier = Modifier.fillMaxWidth()) {
-            Text(if (uiState.mode == AuthUiState.Mode.SignIn) "Войти" else "Зарегистрироваться")
+        Button(onClick = onSubmit, enabled = uiState.canSubmit, modifier = Modifier.fillMaxWidth()) {
+            if (uiState.isSubmitting) {
+                CircularProgressIndicator(modifier = Modifier.padding(2.dp))
+            } else {
+                Text(if (uiState.mode == AuthUiState.Mode.SignIn) "Войти" else "Зарегистрироваться")
+            }
         }
 
         TextButton(onClick = onModeToggle, modifier = Modifier.fillMaxWidth()) {
