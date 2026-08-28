@@ -1,6 +1,8 @@
 package com.nzzima.secretmessanger.di
 
-import com.nzzima.secretmessanger.data.session.InMemorySessionRepository
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.nzzima.secretmessanger.data.session.FirebaseSessionRepository
 import com.nzzima.secretmessanger.data.session.SessionCloser
 import com.nzzima.secretmessanger.data.session.SessionReader
 
@@ -12,9 +14,9 @@ import com.nzzima.secretmessanger.data.session.SessionReader
  */
 class AppContainer {
 
-    private val sessionRepository = InMemorySessionRepository()
+    private val sessionRepository by lazy { FirebaseSessionRepository(Firebase.auth) }
 
-    val sessionReader: SessionReader = sessionRepository
+    val sessionReader: SessionReader get() = sessionRepository
 
-    val sessionCloser: SessionCloser = sessionRepository
+    val sessionCloser: SessionCloser get() = sessionRepository
 }

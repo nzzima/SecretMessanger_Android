@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1076585610178",
+    "project_id": "messangerios",
+    "storage_bucket": "messangerios.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1076585610178:android:f8b5c93f429f28adeab45b",
+        "android_client_info": {
+          "package_name": "com.nzzima.secretmessanger"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCzGpOfxo_P6DDQ5is1GgnuIjuDsegWwL8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
