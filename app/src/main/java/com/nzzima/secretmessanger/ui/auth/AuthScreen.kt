@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -79,32 +81,39 @@ private fun AuthScreen(
     onSubmit: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    BoxWithConstraints(modifier = modifier.fillMaxSize().imePadding()) {
-        // Поле почты ставится туда же, куда его ставит Auto Layout на iOS: по центру экрана
-        // со смещением -30 на входе и -100 на регистрации.
-        val emailCenter = maxHeight / 2 + if (uiState.mode == AuthUiState.Mode.Register) {
-            REGISTER_EMAIL_OFFSET
-        } else {
-            SIGN_IN_EMAIL_OFFSET
-        }
+    BoxWithConstraints(modifier = modifier.fillMaxSize()) {
+        // Высота окна без учёта клавиатуры. Раскладка от клавиатуры не зависит: она только
+        // уменьшает видимую часть и включает прокрутку.
+        val windowHeight = maxHeight
 
-        Text(
-            text = uiState.title,
-            color = Ink,
-            style = TextStyle(
-                fontFamily = FontFamily.Serif,
-                fontSize = 26.sp,
-                letterSpacing = 1.5.sp,
-            ),
-            modifier = Modifier.align(Alignment.TopCenter).padding(top = TITLE_TOP),
-        )
+        // Поле почты стоит там же, где его ставит Auto Layout на iOS: центр экрана со
+        // смещением -30 на входе и -100 на регистрации.
+        val emailCenter = windowHeight / 2 + when (uiState.mode) {
+            AuthUiState.Mode.SignIn -> SIGN_IN_EMAIL_OFFSET
+            AuthUiState.Mode.Register -> REGISTER_EMAIL_OFFSET
+        }
 
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = emailCenter - FIELD_HEIGHT / 2),
+                .fillMaxSize()
+                .imePadding()
+                .verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            Spacer(Modifier.height(TITLE_TOP))
+
+            Text(
+                text = uiState.title,
+                color = Ink,
+                style = TextStyle(
+                    fontFamily = FontFamily.Serif,
+                    fontSize = 26.sp,
+                    letterSpacing = 1.5.sp,
+                ),
+            )
+
+            Spacer(Modifier.height(emailCenter - FIELD_HEIGHT / 2 - TITLE_TOP - TITLE_HEIGHT))
+
             Column(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = SIDE_PADDING),
                 verticalArrangement = Arrangement.spacedBy(FIELD_GAP),
@@ -144,7 +153,10 @@ private fun AuthScreen(
 
             Spacer(
                 Modifier.height(
-                    if (uiState.mode == AuthUiState.Mode.Register) REGISTER_BUTTON_TOP else SIGN_IN_BUTTON_TOP,
+                    when (uiState.mode) {
+                        AuthUiState.Mode.SignIn -> SIGN_IN_BUTTON_TOP
+                        AuthUiState.Mode.Register -> REGISTER_BUTTON_TOP
+                    },
                 ),
             )
 
@@ -161,14 +173,14 @@ private fun AuthScreen(
                 if (uiState.isSubmitting) {
                     CircularProgressIndicator(modifier = Modifier.height(20.dp).width(20.dp), color = Color.Black)
                 } else {
-                    Text(uiState.submitTitle, fontSize = 16.sp)
+                    Text(uiState.submitTitle, fontSize = 16.sp, maxLines = 1)
                 }
             }
 
             Spacer(Modifier.height(LINK_TOP))
 
             TextButton(onClick = onModeToggle) {
-                Text(uiState.switchTitle, color = Accent, fontSize = 15.sp)
+                Text(uiState.switchTitle, color = Accent, fontSize = 15.sp, maxLines = 1)
             }
 
             uiState.error?.let { message ->
@@ -180,6 +192,8 @@ private fun AuthScreen(
                     modifier = Modifier.padding(horizontal = SIDE_PADDING),
                 )
             }
+
+            Spacer(Modifier.height(BOTTOM_PADDING))
         }
     }
 }
@@ -229,6 +243,7 @@ private fun AuthUiState.buttonWidth() = when (mode) {
 }
 
 private val TITLE_TOP = 100.dp
+private val TITLE_HEIGHT = 34.dp
 private val SIGN_IN_EMAIL_OFFSET = (-30).dp
 private val REGISTER_EMAIL_OFFSET = (-100).dp
 private val SIDE_PADDING = 30.dp
@@ -241,3 +256,4 @@ private val REGISTER_BUTTON_TOP = 40.dp
 private val BUTTON_HEIGHT = 40.dp
 private val BUTTON_CORNER = 14.dp
 private val LINK_TOP = 8.dp
+private val BOTTOM_PADDING = 24.dp
