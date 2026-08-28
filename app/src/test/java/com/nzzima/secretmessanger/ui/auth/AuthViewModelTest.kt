@@ -34,26 +34,58 @@ class AuthViewModelTest {
     ) = AuthViewModel(RegisterAccount(registrar, registry, profiles), registrar)
 
     @Test
-    fun `отправка недоступна при коротком пароле`() {
+    fun `короткий пароль отбивается сообщением`() = runTest(dispatcher) {
         val model = viewModel()
 
-        model.onEmailChange("a@b.c")
+        model.onEmailChange("a@b.co")
         model.onPasswordChange("12345")
+        model.onSubmit()
+        dispatcher.scheduler.advanceUntilIdle()
 
-        assertFalse(model.uiState.value.canSubmit)
+        assertEquals("Пароль должен быть не короче 6 символов", model.uiState.value.error)
     }
 
     @Test
-    fun `регистрация дополнительно требует логин`() {
+    fun `битая почта отбивается первой`() = runTest(dispatcher) {
+        val model = viewModel()
+
+        model.onEmailChange("не-почта")
+        model.onPasswordChange("12345")
+        model.onSubmit()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("Проверьте адрес почты", model.uiState.value.error)
+    }
+
+    @Test
+    fun `несовпадающие пароли отбиваются при регистрации`() = runTest(dispatcher) {
+        val profiles = FakeProfileWriter()
+        val model = viewModel(profiles = profiles)
+
+        model.onModeToggle()
+        model.onEmailChange("a@b.co")
+        model.onLoginChange("nzzima")
+        model.onPasswordChange("123456")
+        model.onPasswordRepeatChange("123457")
+        model.onSubmit()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals("Пароли не совпадают", model.uiState.value.error)
+        assertNull(profiles.created)
+    }
+
+    @Test
+    fun `регистрация требует логин по правилам`() = runTest(dispatcher) {
         val model = viewModel()
 
         model.onModeToggle()
-        model.onEmailChange("a@b.c")
+        model.onEmailChange("a@b.co")
         model.onPasswordChange("123456")
-        assertFalse(model.uiState.value.canSubmit)
+        model.onPasswordRepeatChange("123456")
+        model.onSubmit()
+        dispatcher.scheduler.advanceUntilIdle()
 
-        model.onLoginChange("nzzima")
-        assertTrue(model.uiState.value.canSubmit)
+        assertEquals("Логин — от 3 до 20 символов: латиница, цифры, подчёркивание", model.uiState.value.error)
     }
 
     @Test
@@ -72,8 +104,9 @@ class AuthViewModelTest {
         val model = viewModel(registry = registry, profiles = profiles)
 
         model.onModeToggle()
-        model.onEmailChange("a@b.c")
+        model.onEmailChange("a@b.co")
         model.onPasswordChange("123456")
+        model.onPasswordRepeatChange("123456")
         model.onLoginChange("nzzima")
         model.onSubmit()
         dispatcher.scheduler.advanceUntilIdle()
@@ -90,8 +123,9 @@ class AuthViewModelTest {
         val model = viewModel(registry = registry)
 
         model.onModeToggle()
-        model.onEmailChange("a@b.c")
+        model.onEmailChange("a@b.co")
         model.onPasswordChange("123456")
+        model.onPasswordRepeatChange("123456")
         model.onLoginChange("nzzima")
         model.onSubmit()
         dispatcher.scheduler.advanceUntilIdle()
@@ -104,11 +138,11 @@ class AuthViewModelTest {
     fun `вход с верной парой проходит и не оставляет ошибки`() = runTest(dispatcher) {
         val profiles = FakeProfileWriter()
         val model = viewModel(
-            registrar = FakeAccountRegistrar(knownCredentials = "a@b.c" to "123456"),
+            registrar = FakeAccountRegistrar(knownCredentials = "a@b.co" to "123456"),
             profiles = profiles,
         )
 
-        model.onEmailChange("a@b.c")
+        model.onEmailChange("a@b.co")
         model.onPasswordChange("123456")
         model.onSubmit()
         dispatcher.scheduler.advanceUntilIdle()
@@ -120,9 +154,9 @@ class AuthViewModelTest {
 
     @Test
     fun `неверная пара показывается одним отказом`() = runTest(dispatcher) {
-        val model = viewModel(registrar = FakeAccountRegistrar(knownCredentials = "a@b.c" to "123456"))
+        val model = viewModel(registrar = FakeAccountRegistrar(knownCredentials = "a@b.co" to "123456"))
 
-        model.onEmailChange("a@b.c")
+        model.onEmailChange("a@b.co")
         model.onPasswordChange("неверный")
         model.onSubmit()
         dispatcher.scheduler.advanceUntilIdle()
@@ -131,12 +165,14 @@ class AuthViewModelTest {
     }
 
     @Test
-    fun `в режиме входа логин не требуется`() {
+    fun `переключение режима очищает пароли`() {
         val model = viewModel()
 
-        model.onEmailChange("a@b.c")
         model.onPasswordChange("123456")
+        model.onModeToggle()
 
-        assertTrue(model.uiState.value.canSubmit)
+        assertEquals("", model.uiState.value.password)
+        assertEquals("", model.uiState.value.passwordRepeat)
+        assertEquals("Регистрация", model.uiState.value.title)
     }
 }

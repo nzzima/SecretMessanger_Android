@@ -23,15 +23,15 @@ class RegisterAccount(
     /** Причины отказа, показываемые пользователю. */
     sealed class Failure(message: String) : Exception(message) {
 
-        /** Логин не соответствует [LoginRules]. */
-        data object InvalidLogin : Failure("Логин: 3–20 символов, латиница, цифры и _")
+        /** Логин не соответствует [FieldRules]. */
+        data object InvalidLogin : Failure("Логин — от 3 до 20 символов: латиница, цифры, подчёркивание")
 
         /** Логин занят другим аккаунтом. */
         data object LoginTaken : Failure("Логин уже занят — выберите другой")
     }
 
     suspend operator fun invoke(email: String, password: String, login: String): Result<String> {
-        if (!LoginRules.isValid(login)) return Result.failure(Failure.InvalidLogin)
+        if (!FieldRules.isValidLogin(login)) return Result.failure(Failure.InvalidLogin)
 
         registry.check(login, uid = null).onSuccess { availability ->
             if (availability == LoginAvailability.TAKEN) return Result.failure(Failure.LoginTaken)
