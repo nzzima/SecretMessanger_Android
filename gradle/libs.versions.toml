@@ -11,6 +11,7 @@ coroutinesTest = "1.11.0"
 coroutinesPlayServices = "1.11.0"
 googleServices = "4.5.0"
 firebaseBom = "34.18.0"
+bouncycastle = "1.85.2"
 koin = "4.1.0"
 
 [libraries]
@@ -27,6 +28,7 @@ androidx-navigation-compose = { group = "androidx.navigation", name = "navigatio
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore" }
+bouncycastle = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 koin-bom = { group = "io.insert-koin", name = "koin-bom", version.ref = "koin" }
 koin-android = { group = "io.insert-koin", name = "koin-android" }

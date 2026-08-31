@@ -35,6 +35,8 @@ object Constants {
     const val SHORT_PASSWORD = "Пароль должен быть не короче 6 символов"
     const val PASSWORDS_MISMATCH = "Пароли не совпадают"
     const val SERVER_SILENT = "Сервер не ответил. Проверьте связь и попробуйте снова"
+    const val MALFORMED_PAYLOAD = "Не удалось разобрать зашифрованные данные"
+    const val WRONG_KEY = "Сообщение зашифровано другим ключом"
 
     const val AUTH_TITLE = "Авторизация"
     const val REGISTER_TITLE = "Регистрация"

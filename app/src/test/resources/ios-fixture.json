@@ -1,0 +1,11 @@
+{
+  "context": "uidA_uidB#2",
+  "convoKeyExpected": "y481yYhFMe8FgciEe1T3wnJg9/aE+nwo7mW4X2ZzrVI=",
+  "expectedBlobSHA256": "QK/y6dLYki5Hr9RkjmlnSXFYeF+9Hahw5xECZr+USIA=",
+  "expectedPlaintext": "Привет с iOS — если это читается на другой платформе, порт возможен.",
+  "identityPrivate": "2IO9cK61NVkCWIqYc7RvtPvfhFk2RENRIpnqpWUY+GI=",
+  "identityPublic": "C0wc001dPIXXrasEyO/V18yHJObJ1ZKndMcGWM2FcHk=",
+  "sealedBlob": "LK7f7CvfqxFw44mx/Yae0GdyRJV687HuSGL6jMLohjQ6b0mbKj+lg4liJAPy/Tvp6i3tXSri9kVsEtSj5DW3fXsv/Do88lIZkwscOlbyVulhrG6mMPNQ1jRKqrRaejmJ8NcqMBkYf1Ltx7Ts4KLnBLeviWvpMAzZ82qDdH+++AMVrwtOLNZdRjKJ3v4vaDjeOkjtwWvEK3NWKrwqgZR1h8OEZ+a6PZYGwKg1qwhGHe8+YxkRhGH4C7zjqYQGPEaLGurfO3QCHJqzNc8juM2Vnoe4GkUe+qZvM7n9S+ucIVjc7EdbHmxewnOXQsrnlrCVYDaYJfIFzIncnkynof3WbqODFnYYA3IyTWML+MkSI/BY30RF1PJtIVlQAdk=",
+  "sealedKey": "YNC5gUsaRtMTQ6aPfhtoFstcJUHALzTVOl9zgGSG6ls=.R9n/S62R0sgPSha1H95CRtaDM8/cmMB8qNofhqPU612B+to0mMSUQaEybsMkF/GoA1vuVFC4rbAkB8vS",
+  "sealedMessage": "Im7JLqGcUdm46TGm8TbsK9Z2q4cMaDCcKgtYGIlrhmmOjVhDLVIxd6ssPTnBj7zRtdm/cAhlgpLhhgCAfLU1mELClhU9t+kmgl9PmxK0TBC8ms2JeJNbauPX4IfC+3IiWiVYAU1vFGXXF2QD1ZHnduqPQY5j+RTuiNV/Ny0DmYP1c0hxlpIdz/NrB0Veae8YK6c2aMA="
+}
