@@ -17,6 +17,10 @@ object Constants {
     const val NAME_FIELD = "name"
     const val SOME_INFO_FIELD = "someInfo"
 
+    const val IDENTITY_PREFERENCES = "com.nzzima.secretmessanger.identity"
+    const val IDENTITY_ENTRY_PREFIX = "identity."
+    const val MASTER_KEY_ALIAS = "com.nzzima.secretmessanger.master"
+
     const val AUTH_ROUTE = "auth"
     const val CHATS_ROUTE = "chats"
 

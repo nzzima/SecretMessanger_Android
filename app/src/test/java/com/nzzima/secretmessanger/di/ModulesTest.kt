@@ -1,6 +1,7 @@
 package com.nzzima.secretmessanger.di
 
 import com.google.firebase.auth.FirebaseAuth
+import android.content.SharedPreferences
 import com.google.firebase.firestore.FirebaseFirestore
 import com.nzzima.secretmessanger.auth.domain.api.AuthenticationInteractor
 import com.nzzima.secretmessanger.auth.domain.api.AuthenticationRepository
@@ -8,6 +9,7 @@ import com.nzzima.secretmessanger.auth.domain.api.LoginRepository
 import com.nzzima.secretmessanger.auth.domain.api.ProfileRepository
 import com.nzzima.secretmessanger.auth.domain.api.RegistrationInteractor
 import com.nzzima.secretmessanger.auth.domain.api.RegistrationRepository
+import com.nzzima.secretmessanger.crypto.domain.api.MasterKeyProvider
 import com.nzzima.secretmessanger.session.domain.api.SessionCloser
 import com.nzzima.secretmessanger.session.domain.api.SessionInteractor
 import com.nzzima.secretmessanger.session.domain.api.SessionReader
@@ -34,7 +36,12 @@ class ModulesTest {
     @Test
     fun `граф зависимостей полон`() {
         repositoryModule.verify(
-            extraTypes = listOf(FirebaseAuth::class, FirebaseFirestore::class),
+            extraTypes = listOf(
+                FirebaseAuth::class,
+                FirebaseFirestore::class,
+                SharedPreferences::class,
+                MasterKeyProvider::class,
+            ),
         )
 
         interactorModule.verify(
