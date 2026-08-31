@@ -9,7 +9,10 @@ import com.nzzima.secretmessanger.auth.domain.api.LoginRepository
 import com.nzzima.secretmessanger.auth.domain.api.ProfileRepository
 import com.nzzima.secretmessanger.auth.domain.api.RegistrationInteractor
 import com.nzzima.secretmessanger.auth.domain.api.RegistrationRepository
+import com.nzzima.secretmessanger.crypto.domain.api.IdentityInteractor
+import com.nzzima.secretmessanger.crypto.domain.api.IdentityKeyStore
 import com.nzzima.secretmessanger.crypto.domain.api.MasterKeyProvider
+import com.nzzima.secretmessanger.crypto.domain.api.PublicKeyRepository
 import com.nzzima.secretmessanger.session.domain.api.SessionCloser
 import com.nzzima.secretmessanger.session.domain.api.SessionInteractor
 import com.nzzima.secretmessanger.session.domain.api.SessionReader
@@ -52,6 +55,8 @@ class ModulesTest {
                 ProfileRepository::class,
                 SessionReader::class,
                 SessionCloser::class,
+                IdentityKeyStore::class,
+                PublicKeyRepository::class,
             ),
         )
 
@@ -60,6 +65,7 @@ class ModulesTest {
                 RegistrationInteractor::class,
                 AuthenticationInteractor::class,
                 SessionInteractor::class,
+                IdentityInteractor::class,
             ),
         )
     }

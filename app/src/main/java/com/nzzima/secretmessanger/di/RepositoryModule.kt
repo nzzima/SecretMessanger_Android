@@ -9,7 +9,9 @@ import com.nzzima.secretmessanger.auth.domain.api.LoginRepository
 import com.nzzima.secretmessanger.auth.domain.api.ProfileRepository
 import com.nzzima.secretmessanger.auth.domain.api.RegistrationRepository
 import com.nzzima.secretmessanger.crypto.data.impl.IdentityKeyStoreImpl
+import com.nzzima.secretmessanger.crypto.data.impl.PublicKeyRepositoryImpl
 import com.nzzima.secretmessanger.crypto.domain.api.IdentityKeyStore
+import com.nzzima.secretmessanger.crypto.domain.api.PublicKeyRepository
 import com.nzzima.secretmessanger.session.data.impl.SessionRepositoryImpl
 import com.nzzima.secretmessanger.session.domain.api.SessionCloser
 import com.nzzima.secretmessanger.session.domain.api.SessionReader
@@ -42,6 +44,10 @@ val repositoryModule = module {
 
     single<IdentityKeyStore> {
         IdentityKeyStoreImpl(get(), get())
+    }
+
+    single<PublicKeyRepository> {
+        PublicKeyRepositoryImpl(get())
     }
 
     single {

@@ -1,8 +1,12 @@
 package com.nzzima.secretmessanger.main.ui
 
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
@@ -11,16 +15,19 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.nzzima.secretmessanger.auth.ui.AuthScreen
 import com.nzzima.secretmessanger.chats.ui.ChatsScreen
-import com.nzzima.secretmessanger.session.domain.models.Session
+import com.nzzima.secretmessanger.crypto.ui.IdentityScreen
+import com.nzzima.secretmessanger.utils.constants.Constants
 import org.koin.androidx.compose.koinViewModel
 
 /**
  * Граф навигации приложения.
  *
- * Стартовое назначение выбирается по текущему значению
- * [RootViewModel.observeSession]: [Destination.Auth] при [Session.Anonymous], иначе
- * [Destination.Chats]. Дальнейшие изменения сессии переводят граф на соответствующее
- * назначение и очищают стек возврата.
+ * Назначение выводится из [RootState] целиком: [Destination.Chats] достижимо только при
+ * [RootState.Ready], то есть после того, как ключ проверен и опубликован. Развилка —
+ * отдельное назначение, а не диалог поверх чатов, поэтому обойти её нечем.
+ *
+ * Стек возврата очищается на каждом переходе: возвращаться с развилки в чаты или из чатов
+ * на экран входа некуда.
  */
 @Composable
 fun AppNavHost(
@@ -28,8 +35,14 @@ fun AppNavHost(
     navController: NavHostController = rememberNavController(),
     viewModel: RootViewModel = koinViewModel(),
 ) {
-    val session by viewModel.observeSession().collectAsStateWithLifecycle()
-    val target = if (session is Session.Anonymous) Destination.Auth else Destination.Chats
+    val state by viewModel.observeRootState().collectAsStateWithLifecycle()
+
+    val target = when (state) {
+        RootState.Anonymous -> Destination.Auth
+        RootState.Checking -> Destination.Loading
+        RootState.NeedsConfirmation, is RootState.Failed -> Destination.Identity
+        RootState.Ready -> Destination.Chats
+    }
 
     LaunchedEffect(target) {
         if (navController.currentDestination?.route != target.route) {
@@ -39,11 +52,25 @@ fun AppNavHost(
 
     NavHost(
         navController = navController,
-        startDestination = target.route,
+        startDestination = Destination.Loading.route,
         modifier = modifier,
     ) {
+        composable(Destination.Loading.route) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator()
+            }
+        }
         composable(Destination.Auth.route) {
             AuthScreen()
+        }
+        composable(Destination.Identity.route) {
+            val failure = state as? RootState.Failed
+            IdentityScreen(
+                warning = failure?.message ?: Constants.IDENTITY_WARNING,
+                actionTitle = if (failure == null) Constants.IDENTITY_CONTINUE else Constants.RETRY,
+                onAction = if (failure == null) viewModel::confirmOverwrite else viewModel::retry,
+                onSignOut = viewModel::signOut,
+            )
         }
         composable(Destination.Chats.route) {
             ChatsScreen()

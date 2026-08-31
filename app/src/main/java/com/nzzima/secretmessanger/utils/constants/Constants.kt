@@ -16,6 +16,7 @@ object Constants {
     const val LOGIN_FIELD = "login"
     const val NAME_FIELD = "name"
     const val SOME_INFO_FIELD = "someInfo"
+    const val PUBLIC_KEY_FIELD = "publicKey"
 
     const val IDENTITY_PREFERENCES = "com.nzzima.secretmessanger.identity"
     const val IDENTITY_ENTRY_PREFIX = "identity."
@@ -23,6 +24,8 @@ object Constants {
 
     const val AUTH_ROUTE = "auth"
     const val CHATS_ROUTE = "chats"
+    const val IDENTITY_ROUTE = "identity"
+    const val LOADING_ROUTE = "loading"
 
     const val LOGIN_MIN_LENGTH = 3
     const val LOGIN_MAX_LENGTH = 20
@@ -57,4 +60,9 @@ object Constants {
     const val CHATS_TITLE = "Чаты"
     const val CHATS_EMPTY = "Диалогов пока нет"
     const val SIGN_OUT = "Выйти"
+
+    const val IDENTITY_TITLE = "Ключ этого аккаунта"
+    const val IDENTITY_WARNING = "У этого аккаунта уже есть ключ шифрования, заведённый на другом устройстве. Перенести его сюда нечем. Продолжить можно только со своим ключом — тогда прежняя переписка не откроется ни здесь, ни на том устройстве."
+    const val IDENTITY_CONTINUE = "Продолжить со своим ключом"
+    const val RETRY = "Повторить"
 }
