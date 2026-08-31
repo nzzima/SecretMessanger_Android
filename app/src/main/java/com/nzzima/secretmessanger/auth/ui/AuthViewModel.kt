@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Состояние экрана авторизации и обработка ввода.
@@ -56,6 +57,11 @@ class AuthViewModel(
      *
      * Непройденная проверка и отказ сервиса попадают в [AuthUiState.error]; порядок проверок
      * совпадает с `RegistrationViewPresenter` на iOS.
+     *
+     * Отправка ограничена [Constants.SUBMIT_TIMEOUT_MS]. По истечении срока вызов
+     * отменяется, [AuthUiState.isSubmitting] снимается, а в [AuthUiState.error] ложится
+     * [Constants.SERVER_SILENT]. Отменённая на полпути регистрация оставляет созданный
+     * аккаунт без логина и профиля.
      */
     fun onSubmit() {
         val state = authScreenState.value
@@ -68,15 +74,23 @@ class AuthViewModel(
 
         authScreenState.update { it.copy(isSubmitting = true, error = null) }
         viewModelScope.launch {
-            val result = when (state.mode) {
-                AuthUiState.Mode.SignIn ->
-                    authenticationInteractor.signIn(state.email, state.password)
+            val result = withTimeoutOrNull(Constants.SUBMIT_TIMEOUT_MS) {
+                when (state.mode) {
+                    AuthUiState.Mode.SignIn ->
+                        authenticationInteractor.signIn(state.email, state.password)
 
-                AuthUiState.Mode.Register ->
-                    registrationInteractor.register(state.email, state.password, state.login)
+                    AuthUiState.Mode.Register ->
+                        registrationInteractor.register(state.email, state.password, state.login)
+                }
             }
             authScreenState.update { current ->
-                current.copy(isSubmitting = false, error = result.exceptionOrNull()?.message)
+                current.copy(
+                    isSubmitting = false,
+                    error = when (result) {
+                        null -> Constants.SERVER_SILENT
+                        else -> result.exceptionOrNull()?.message
+                    },
+                )
             }
         }
     }

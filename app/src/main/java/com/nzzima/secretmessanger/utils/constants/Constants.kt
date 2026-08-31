@@ -24,6 +24,8 @@ object Constants {
     const val LOGIN_MAX_LENGTH = 20
     const val PASSWORD_MIN_LENGTH = 6
 
+    const val SUBMIT_TIMEOUT_MS = 20_000L
+
     const val EMAIL_TAKEN = "Эта почта уже занята"
     const val WEAK_PASSWORD = "Пароль слишком простой"
     const val WRONG_CREDENTIALS = "Неверная почта или пароль"
@@ -32,6 +34,7 @@ object Constants {
     const val INVALID_LOGIN = "Логин — от 3 до 20 символов: латиница, цифры, подчёркивание"
     const val SHORT_PASSWORD = "Пароль должен быть не короче 6 символов"
     const val PASSWORDS_MISMATCH = "Пароли не совпадают"
+    const val SERVER_SILENT = "Сервер не ответил. Проверьте связь и попробуйте снова"
 
     const val AUTH_TITLE = "Авторизация"
     const val REGISTER_TITLE = "Регистрация"

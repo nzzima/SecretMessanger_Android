@@ -5,6 +5,7 @@ import com.nzzima.secretmessanger.auth.domain.FakeLoginRepository
 import com.nzzima.secretmessanger.auth.domain.FakeProfileRepository
 import com.nzzima.secretmessanger.auth.domain.impl.AuthenticationInteractorImpl
 import com.nzzima.secretmessanger.auth.domain.impl.RegistrationInteractorImpl
+import com.nzzima.secretmessanger.utils.constants.Constants
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -179,5 +180,37 @@ class AuthViewModelTest {
         assertEquals("", model.state().password)
         assertEquals("", model.state().passwordRepeat)
         assertEquals("Регистрация", model.state().title)
+    }
+
+    @Test
+    fun `зависшая регистрация снимается таймаутом`() = runTest(dispatcher) {
+        val logins = FakeLoginRepository(hangs = true)
+        val profiles = FakeProfileRepository()
+        val model = viewModel(logins = logins, profiles = profiles)
+
+        model.onModeToggle()
+        model.onEmailChange("a@b.co")
+        model.onLoginChange("nzzima")
+        model.onPasswordChange("123456")
+        model.onPasswordRepeatChange("123456")
+        model.onSubmit()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(Constants.SERVER_SILENT, model.state().error)
+        assertFalse("спиннер обязан погаснуть", model.state().isSubmitting)
+        assertNull("до профиля дело не дошло", profiles.created)
+    }
+
+    @Test
+    fun `зависший вход снимается таймаутом`() = runTest(dispatcher) {
+        val model = viewModel(accounts = FakeAccountRepository(hangs = true))
+
+        model.onEmailChange("a@b.co")
+        model.onPasswordChange("123456")
+        model.onSubmit()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(Constants.SERVER_SILENT, model.state().error)
+        assertFalse(model.state().isSubmitting)
     }
 }

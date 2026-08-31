@@ -6,32 +6,38 @@ import com.nzzima.secretmessanger.auth.domain.api.ProfileRepository
 import com.nzzima.secretmessanger.auth.domain.api.RegistrationRepository
 import com.nzzima.secretmessanger.auth.domain.models.AccountFailure
 import com.nzzima.secretmessanger.auth.domain.models.LoginAvailability
+import kotlinx.coroutines.awaitCancellation
 
 /**
  * [RegistrationRepository] и [AuthenticationRepository] в памяти.
  *
  * [registerFails] задаёт отказ создания аккаунта, [knownCredentials] — пару «почта к
  * паролю», которую примет [signIn]; любая другая пара даёт
- * [AccountFailure.WrongCredentials].
+ * [AccountFailure.WrongCredentials]. При [hangs] обе операции не завершаются никогда.
  */
 class FakeAccountRepository(
     private val uid: String = "uid-1",
     private val registerFails: Throwable? = null,
     private val knownCredentials: Pair<String, String>? = null,
+    private val hangs: Boolean = false,
 ) : RegistrationRepository, AuthenticationRepository {
 
     var deleted = false
         private set
 
-    override suspend fun register(email: String, password: String): Result<String> =
-        registerFails?.let { Result.failure(it) } ?: Result.success(uid)
+    override suspend fun register(email: String, password: String): Result<String> {
+        if (hangs) awaitCancellation()
+        return registerFails?.let { Result.failure(it) } ?: Result.success(uid)
+    }
 
-    override suspend fun signIn(email: String, password: String): Result<String> =
-        if (knownCredentials == Pair(email, password)) {
+    override suspend fun signIn(email: String, password: String): Result<String> {
+        if (hangs) awaitCancellation()
+        return if (knownCredentials == Pair(email, password)) {
             Result.success(uid)
         } else {
             Result.failure(AccountFailure.WrongCredentials)
         }
+    }
 
     override suspend fun deleteCurrent(): Result<Unit> {
         deleted = true
@@ -41,17 +47,19 @@ class FakeAccountRepository(
 
 /**
  * [LoginRepository] в памяти. [taken] задаёт занятые логины как «ключ реестра → uid»,
- * [claimFails] — отказ при попытке занять.
+ * [claimFails] — отказ при попытке занять. При [hangs] [check] не завершается никогда.
  */
 class FakeLoginRepository(
     private val taken: MutableMap<String, String> = mutableMapOf(),
     private val claimFails: Throwable? = null,
+    private val hangs: Boolean = false,
 ) : LoginRepository {
 
     var claimed = mutableListOf<String>()
         private set
 
     override suspend fun check(login: String, uid: String?): Result<LoginAvailability> {
+        if (hangs) awaitCancellation()
         val owner = taken[LoginRepository.key(login)]
         return Result.success(
             when {
