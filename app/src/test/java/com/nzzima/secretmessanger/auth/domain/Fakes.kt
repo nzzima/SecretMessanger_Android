@@ -1,0 +1,83 @@
+package com.nzzima.secretmessanger.auth.domain
+
+import com.nzzima.secretmessanger.auth.domain.api.AuthenticationRepository
+import com.nzzima.secretmessanger.auth.domain.api.LoginRepository
+import com.nzzima.secretmessanger.auth.domain.api.ProfileRepository
+import com.nzzima.secretmessanger.auth.domain.api.RegistrationRepository
+import com.nzzima.secretmessanger.auth.domain.models.AccountFailure
+import com.nzzima.secretmessanger.auth.domain.models.LoginAvailability
+
+/**
+ * [RegistrationRepository] и [AuthenticationRepository] в памяти.
+ *
+ * [registerFails] задаёт отказ создания аккаунта, [knownCredentials] — пару «почта к
+ * паролю», которую примет [signIn]; любая другая пара даёт
+ * [AccountFailure.WrongCredentials].
+ */
+class FakeAccountRepository(
+    private val uid: String = "uid-1",
+    private val registerFails: Throwable? = null,
+    private val knownCredentials: Pair<String, String>? = null,
+) : RegistrationRepository, AuthenticationRepository {
+
+    var deleted = false
+        private set
+
+    override suspend fun register(email: String, password: String): Result<String> =
+        registerFails?.let { Result.failure(it) } ?: Result.success(uid)
+
+    override suspend fun signIn(email: String, password: String): Result<String> =
+        if (knownCredentials == Pair(email, password)) {
+            Result.success(uid)
+        } else {
+            Result.failure(AccountFailure.WrongCredentials)
+        }
+
+    override suspend fun deleteCurrent(): Result<Unit> {
+        deleted = true
+        return Result.success(Unit)
+    }
+}
+
+/**
+ * [LoginRepository] в памяти. [taken] задаёт занятые логины как «ключ реестра → uid»,
+ * [claimFails] — отказ при попытке занять.
+ */
+class FakeLoginRepository(
+    private val taken: MutableMap<String, String> = mutableMapOf(),
+    private val claimFails: Throwable? = null,
+) : LoginRepository {
+
+    var claimed = mutableListOf<String>()
+        private set
+
+    override suspend fun check(login: String, uid: String?): Result<LoginAvailability> {
+        val owner = taken[LoginRepository.key(login)]
+        return Result.success(
+            when {
+                owner == null -> LoginAvailability.FREE
+                owner == uid -> LoginAvailability.MINE
+                else -> LoginAvailability.TAKEN
+            },
+        )
+    }
+
+    override suspend fun claim(login: String, uid: String): Result<Unit> {
+        claimFails?.let { return Result.failure(it) }
+        taken[LoginRepository.key(login)] = uid
+        claimed += login
+        return Result.success(Unit)
+    }
+}
+
+/** [ProfileRepository] в памяти. Хранит последний записанный профиль. */
+class FakeProfileRepository : ProfileRepository {
+
+    var created: Triple<String, String, String>? = null
+        private set
+
+    override suspend fun createProfile(uid: String, login: String, name: String): Result<Unit> {
+        created = Triple(uid, login, name)
+        return Result.success(Unit)
+    }
+}
