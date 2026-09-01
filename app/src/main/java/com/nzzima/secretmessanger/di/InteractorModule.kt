@@ -4,13 +4,22 @@ import com.nzzima.secretmessanger.auth.domain.api.AuthenticationInteractor
 import com.nzzima.secretmessanger.auth.domain.api.RegistrationInteractor
 import com.nzzima.secretmessanger.auth.domain.impl.AuthenticationInteractorImpl
 import com.nzzima.secretmessanger.auth.domain.impl.RegistrationInteractorImpl
+import com.nzzima.secretmessanger.chats.domain.api.ChatsInteractor
+import com.nzzima.secretmessanger.chats.domain.impl.ChatsInteractorImpl
+import com.nzzima.secretmessanger.crypto.domain.api.ConversationKeys
 import com.nzzima.secretmessanger.crypto.domain.api.IdentityInteractor
+import com.nzzima.secretmessanger.crypto.domain.impl.ConversationKeysImpl
 import com.nzzima.secretmessanger.crypto.domain.impl.IdentityInteractorImpl
 import com.nzzima.secretmessanger.session.domain.api.SessionInteractor
 import com.nzzima.secretmessanger.session.domain.impl.SessionInteractorImpl
 import org.koin.dsl.module
 
-/** Сценарии, которыми пользуется слой представления. */
+/**
+ * Сценарии, которыми пользуется слой представления.
+ *
+ * [ConversationKeysImpl] объявлен одиночкой ради кэша открытых ключей диалогов: второй
+ * экземпляр распечатывал бы их заново.
+ */
 val interactorModule = module {
 
     single<RegistrationInteractor> {
@@ -27,5 +36,13 @@ val interactorModule = module {
 
     single<SessionInteractor> {
         SessionInteractorImpl(get(), get())
+    }
+
+    single<ConversationKeys> {
+        ConversationKeysImpl(get())
+    }
+
+    single<ChatsInteractor> {
+        ChatsInteractorImpl(get(), get())
     }
 }

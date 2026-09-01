@@ -11,12 +11,23 @@ object Constants {
 
     const val LOGINS_COLLECTION = "logins"
     const val USERS_COLLECTION = "users"
+    const val CONVERSATION_COLLECTION = "conversation"
 
     const val UID_FIELD = "uid"
     const val LOGIN_FIELD = "login"
     const val NAME_FIELD = "name"
     const val SOME_INFO_FIELD = "someInfo"
     const val PUBLIC_KEY_FIELD = "publicKey"
+
+    const val USERS_FIELD = "users"
+    const val LOGINS_FIELD = "logins"
+    const val OWNER_FIELD = "owner"
+    const val CONVO_KEYS_FIELD = "convoKeys"
+    const val KEY_VERSION_FIELD = "keyVersion"
+    const val LAST_MESSAGE_FIELD = "lastMessage"
+    const val LAST_ENCRYPTED_FIELD = "lastEnc"
+    const val LAST_VERSION_FIELD = "lastV"
+    const val DATE_FIELD = "date"
 
     const val IDENTITY_PREFERENCES = "com.nzzima.secretmessanger.identity"
     const val IDENTITY_ENTRY_PREFIX = "identity."
@@ -59,6 +70,7 @@ object Constants {
 
     const val CHATS_TITLE = "Чаты"
     const val CHATS_EMPTY = "Диалогов пока нет"
+    const val PREVIEW_UNREADABLE = "🔒 Сообщение не расшифровано"
     const val SIGN_OUT = "Выйти"
 
     const val IDENTITY_TITLE = "Ключ этого аккаунта"
