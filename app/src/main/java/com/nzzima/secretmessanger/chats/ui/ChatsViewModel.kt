@@ -14,9 +14,9 @@ import kotlinx.coroutines.launch
 /**
  * Состояние экрана списка диалогов.
  *
- * Идентификатор аккаунта берётся из сессии в момент подписки: экран достижим только из
+ * Идентификатор аккаунта берётся из сессии в момент подписки: вкладка достижима только из
  * [com.nzzima.secretmessanger.main.ui.RootState.Ready], то есть при живой сессии. Смену
- * аккаунта модель не отслеживает — выход уводит с экрана целиком.
+ * аккаунта модель не отслеживает — выход уводит с вкладок целиком.
  */
 class ChatsViewModel(
     private val sessionInteractor: SessionInteractor,
@@ -40,9 +40,6 @@ class ChatsViewModel(
      * прежней подпиской нечего.
      */
     fun retry() = subscribe()
-
-    /** Завершает сессию. Локальные данные аккаунта не затрагивает. */
-    fun signOut() = sessionInteractor.signOut()
 
     private fun subscribe() {
         val uid = sessionInteractor.observeSession().value.uidOrNull ?: return

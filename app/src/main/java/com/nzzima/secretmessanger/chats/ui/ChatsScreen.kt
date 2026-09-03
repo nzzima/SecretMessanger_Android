@@ -12,9 +12,11 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.only
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.ScaffoldDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -23,12 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.nzzima.secretmessanger.chats.domain.models.Conversation
+import com.nzzima.secretmessanger.ui.components.FailureNotice
+import com.nzzima.secretmessanger.ui.components.Notice
 import com.nzzima.secretmessanger.ui.theme.Ink
 import com.nzzima.secretmessanger.ui.theme.InkDim
 import com.nzzima.secretmessanger.utils.constants.Constants
@@ -53,10 +56,10 @@ fun ChatsScreen(
 
     Scaffold(
         modifier = modifier.fillMaxSize(),
+        contentWindowInsets = ScaffoldDefaults.contentWindowInsets.only(WindowInsetsSides.Top),
         topBar = {
             TopAppBar(
                 title = { Text(Constants.CHATS_TITLE) },
-                actions = { TextButton(onClick = viewModel::signOut) { Text(Constants.SIGN_OUT) } },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
@@ -72,10 +75,7 @@ fun ChatsScreen(
 
                 is ChatsUiState.Content -> ConversationList(current.conversations)
 
-                is ChatsUiState.Failed -> Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Notice(current.message)
-                    TextButton(onClick = viewModel::retry) { Text(Constants.RETRY) }
-                }
+                is ChatsUiState.Failed -> FailureNotice(current.message, viewModel::retry)
             }
         }
     }
@@ -127,17 +127,6 @@ private fun ConversationRow(conversation: Conversation) {
             style = TextStyle(fontSize = 12.sp, fontFeatureSettings = "tnum"),
         )
     }
-}
-
-@Composable
-private fun Notice(text: String) {
-    Text(
-        text = text,
-        color = InkDim,
-        fontSize = 15.sp,
-        textAlign = TextAlign.Center,
-        modifier = Modifier.padding(horizontal = SIDE_PADDING),
-    )
 }
 
 /** Время последней реплики в коротком формате системной локали, как на iOS. */

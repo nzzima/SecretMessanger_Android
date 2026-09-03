@@ -6,10 +6,14 @@ import com.nzzima.secretmessanger.auth.domain.impl.AuthenticationInteractorImpl
 import com.nzzima.secretmessanger.auth.domain.impl.RegistrationInteractorImpl
 import com.nzzima.secretmessanger.chats.domain.api.ChatsInteractor
 import com.nzzima.secretmessanger.chats.domain.impl.ChatsInteractorImpl
+import com.nzzima.secretmessanger.contacts.domain.api.ContactsInteractor
+import com.nzzima.secretmessanger.contacts.domain.impl.ContactsInteractorImpl
 import com.nzzima.secretmessanger.crypto.domain.api.ConversationKeys
 import com.nzzima.secretmessanger.crypto.domain.api.IdentityInteractor
 import com.nzzima.secretmessanger.crypto.domain.impl.ConversationKeysImpl
 import com.nzzima.secretmessanger.crypto.domain.impl.IdentityInteractorImpl
+import com.nzzima.secretmessanger.profile.domain.api.ProfileInteractor
+import com.nzzima.secretmessanger.profile.domain.impl.ProfileInteractorImpl
 import com.nzzima.secretmessanger.session.domain.api.SessionInteractor
 import com.nzzima.secretmessanger.session.domain.impl.SessionInteractorImpl
 import org.koin.dsl.module
@@ -44,5 +48,13 @@ val interactorModule = module {
 
     single<ChatsInteractor> {
         ChatsInteractorImpl(get(), get())
+    }
+
+    single<ContactsInteractor> {
+        ContactsInteractorImpl(get())
+    }
+
+    single<ProfileInteractor> {
+        ProfileInteractorImpl(get())
     }
 }

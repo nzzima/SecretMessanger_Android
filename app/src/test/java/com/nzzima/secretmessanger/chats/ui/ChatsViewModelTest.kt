@@ -123,16 +123,6 @@ class ChatsViewModelTest {
     }
 
     @Test
-    fun `выход завершает сессию`() = runTest(dispatcher) {
-        val model = viewModel()
-        dispatcher.scheduler.advanceUntilIdle()
-
-        model.signOut()
-
-        assertSame(Session.Anonymous, sessions.session.value)
-    }
-
-    @Test
     fun `без сессии подписки не бывает`() = runTest(dispatcher) {
         sessions.signOut()
         val model = viewModel()

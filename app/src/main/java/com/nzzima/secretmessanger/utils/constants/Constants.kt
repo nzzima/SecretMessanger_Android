@@ -34,9 +34,13 @@ object Constants {
     const val MASTER_KEY_ALIAS = "com.nzzima.secretmessanger.master"
 
     const val AUTH_ROUTE = "auth"
-    const val CHATS_ROUTE = "chats"
     const val IDENTITY_ROUTE = "identity"
     const val LOADING_ROUTE = "loading"
+    const val MAIN_ROUTE = "main"
+
+    const val CONTACTS_ROUTE = "contacts"
+    const val CHATS_ROUTE = "chats"
+    const val PROFILE_ROUTE = "profile"
 
     const val LOGIN_MIN_LENGTH = 3
     const val LOGIN_MAX_LENGTH = 20
@@ -71,6 +75,17 @@ object Constants {
     const val CHATS_TITLE = "Чаты"
     const val CHATS_EMPTY = "Диалогов пока нет"
     const val PREVIEW_UNREADABLE = "🔒 Сообщение не расшифровано"
+
+    const val CONTACTS_TITLE = "Контакты"
+    const val CONTACTS_EMPTY = "Кроме вас здесь пока никого нет"
+
+    const val PROFILE_MISSING = "Профиль этого аккаунта не найден"
+
+    const val PROFILE_TITLE = "Профиль"
+    const val PROFILE_LOGIN = "Логин"
+    const val PROFILE_NAME = "Имя"
+    const val PROFILE_IDENTIFIER = "Идентификатор"
+
     const val SIGN_OUT = "Выйти"
 
     const val IDENTITY_TITLE = "Ключ этого аккаунта"

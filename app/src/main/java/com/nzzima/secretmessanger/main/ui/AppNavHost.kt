@@ -14,7 +14,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.nzzima.secretmessanger.auth.ui.AuthScreen
-import com.nzzima.secretmessanger.chats.ui.ChatsScreen
 import com.nzzima.secretmessanger.crypto.ui.IdentityScreen
 import com.nzzima.secretmessanger.utils.constants.Constants
 import org.koin.androidx.compose.koinViewModel
@@ -22,12 +21,13 @@ import org.koin.androidx.compose.koinViewModel
 /**
  * Граф навигации приложения.
  *
- * Назначение выводится из [RootState] целиком: [Destination.Chats] достижимо только при
+ * Назначение выводится из [RootState] целиком: [Destination.Main] достижимо только при
  * [RootState.Ready], то есть после того, как ключ проверен и опубликован. Развилка —
- * отдельное назначение, а не диалог поверх чатов, поэтому обойти её нечем.
+ * отдельное назначение, а не диалог поверх вкладок, поэтому обойти её нечем.
  *
- * Стек возврата очищается на каждом переходе: возвращаться с развилки в чаты или из чатов
- * на экран входа некуда.
+ * Стек возврата очищается на каждом переходе: возвращаться с развилки во вкладки или из
+ * вкладок на экран входа некуда. История **внутри** вкладок живёт в своём графе — см.
+ * [MainScreen].
  */
 @Composable
 fun AppNavHost(
@@ -41,7 +41,7 @@ fun AppNavHost(
         RootState.Anonymous -> Destination.Auth
         RootState.Checking -> Destination.Loading
         RootState.NeedsConfirmation, is RootState.Failed -> Destination.Identity
-        RootState.Ready -> Destination.Chats
+        RootState.Ready -> Destination.Main
     }
 
     LaunchedEffect(target) {
@@ -72,8 +72,8 @@ fun AppNavHost(
                 onSignOut = viewModel::signOut,
             )
         }
-        composable(Destination.Chats.route) {
-            ChatsScreen()
+        composable(Destination.Main.route) {
+            MainScreen()
         }
     }
 }
