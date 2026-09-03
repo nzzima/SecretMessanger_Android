@@ -2,6 +2,7 @@ package com.nzzima.secretmessanger.main.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.nzzima.secretmessanger.auth.domain.api.ProfileRepairInteractor
 import com.nzzima.secretmessanger.crypto.domain.api.IdentityInteractor
 import com.nzzima.secretmessanger.crypto.domain.models.IdentityState
 import com.nzzima.secretmessanger.session.domain.api.SessionInteractor
@@ -20,10 +21,16 @@ import kotlinx.coroutines.launch
  *
  * [RootState.Ready] выставляется только после успешной проверки, поэтому мимо развилки в
  * список диалогов не попасть.
+ *
+ * Порядок проверок обязателен: сначала профиль, потом ключ. Публикация открытой половины
+ * пишет `users/{uid}` слиянием, а правило этой коллекции требует в записи логин, занятый тем
+ * же аккаунтом, — на аккаунте без профиля публикация не проходит, и развилка ключа стала бы
+ * тупиком без выхода.
  */
 class RootViewModel(
     private val sessionInteractor: SessionInteractor,
     private val identityInteractor: IdentityInteractor,
+    private val profileRepairInteractor: ProfileRepairInteractor,
 ) : ViewModel() {
 
     private val rootState = MutableStateFlow<RootState>(RootState.Checking)
@@ -63,11 +70,38 @@ class RootViewModel(
         }
     }
 
+    /**
+     * Достраивает оборванную регистрацию под именем [login] и продолжает вход.
+     *
+     * Вызывается только с экрана достройки. Неудача возвращает на него же с причиной:
+     * занятый логин лечится другим логином, а не повтором того же.
+     */
+    fun repairProfile(login: String) {
+        val uid = uidOrNull() ?: return
+        rootState.value = RootState.Checking
+        viewModelScope.launch {
+            profileRepairInteractor.complete(uid, login)
+                .onSuccess { prepare(uid) }
+                .onFailure { rootState.value = RootState.NeedsProfile(it.message ?: Constants.SERVER_SILENT) }
+        }
+    }
+
     /** Завершает сессию. Ключ на устройстве не стирается. */
     fun signOut() = sessionInteractor.signOut()
 
     private suspend fun prepare(uid: String) {
         rootState.value = RootState.Checking
+
+        val complete = profileRepairInteractor.isComplete(uid).getOrElse { error ->
+            rootState.value = RootState.Failed(error.message ?: Constants.SERVER_SILENT)
+            return
+        }
+
+        if (!complete) {
+            rootState.value = RootState.NeedsProfile()
+            return
+        }
+
         identityInteractor.prepare(uid)
             .onSuccess {
                 rootState.value = when (it) {

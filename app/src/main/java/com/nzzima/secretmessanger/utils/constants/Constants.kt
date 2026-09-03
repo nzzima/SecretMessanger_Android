@@ -35,6 +35,7 @@ object Constants {
 
     const val AUTH_ROUTE = "auth"
     const val IDENTITY_ROUTE = "identity"
+    const val REPAIR_ROUTE = "repair"
     const val LOADING_ROUTE = "loading"
     const val MAIN_ROUTE = "main"
 
@@ -87,6 +88,10 @@ object Constants {
     const val PROFILE_IDENTIFIER = "Идентификатор"
 
     const val SIGN_OUT = "Выйти"
+
+    const val REPAIR_TITLE = "Регистрация не завершена"
+    const val REPAIR_EXPLANATION = "Аккаунт создан, но логин за ним не закреплён — регистрация оборвалась на полпути. Выберите логин, и вход продолжится. Прежний, если он остался за вами, тоже подойдёт."
+    const val REPAIR_SUBMIT = "Продолжить"
 
     const val IDENTITY_TITLE = "Ключ этого аккаунта"
     const val IDENTITY_WARNING = "У этого аккаунта уже есть ключ шифрования, заведённый на другом устройстве. Перенести его сюда нечем. Продолжить можно только со своим ключом — тогда прежняя переписка не откроется ни здесь, ни на том устройстве."

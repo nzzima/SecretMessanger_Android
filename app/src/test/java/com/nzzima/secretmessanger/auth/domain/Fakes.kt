@@ -79,13 +79,26 @@ class FakeLoginRepository(
 }
 
 /** [ProfileRepository] в памяти. Хранит последний записанный профиль. */
-class FakeProfileRepository : ProfileRepository {
+/**
+ * [ProfileRepository] в памяти.
+ *
+ * [withProfile] перечисляет аккаунты, у которых профиль уже есть; [existsFails] задаёт отказ
+ * чтения — им проверяется, что оболочка не путает «профиля нет» с «не удалось спросить».
+ */
+class FakeProfileRepository(
+    private val withProfile: MutableSet<String> = mutableSetOf(),
+    private val existsFails: Throwable? = null,
+) : ProfileRepository {
 
     var created: Triple<String, String, String>? = null
         private set
 
     override suspend fun createProfile(uid: String, login: String, name: String): Result<Unit> {
         created = Triple(uid, login, name)
+        withProfile += uid
         return Result.success(Unit)
     }
+
+    override suspend fun exists(uid: String): Result<Boolean> =
+        existsFails?.let { Result.failure(it) } ?: Result.success(uid in withProfile)
 }

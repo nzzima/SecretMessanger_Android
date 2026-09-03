@@ -22,4 +22,12 @@ class ProfileRepositoryImpl(private val firestore: FirebaseFirestore) : ProfileR
             )
             .await()
     }
+
+    override suspend fun exists(uid: String): Result<Boolean> = runCatching {
+        firestore.collection(Constants.USERS_COLLECTION)
+            .document(uid)
+            .get()
+            .await()
+            .exists()
+    }
 }

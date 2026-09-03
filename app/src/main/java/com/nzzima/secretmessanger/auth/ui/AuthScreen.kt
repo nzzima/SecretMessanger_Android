@@ -1,8 +1,6 @@
 package com.nzzima.secretmessanger.auth.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,8 +13,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -29,21 +25,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.nzzima.secretmessanger.ui.components.Field
 import com.nzzima.secretmessanger.ui.theme.Accent
 import com.nzzima.secretmessanger.ui.theme.Ink
-import com.nzzima.secretmessanger.ui.theme.InkDim
-import com.nzzima.secretmessanger.ui.theme.Raised
 import com.nzzima.secretmessanger.utils.constants.Constants
 import org.koin.androidx.compose.koinViewModel
 
@@ -201,45 +192,6 @@ private fun AuthScreen(
     }
 }
 
-/** Поле ввода: высота 50, скругление 15, фон [Raised] — как `TextField` на iOS. */
-@Composable
-private fun Field(
-    value: String,
-    onValueChange: (String) -> Unit,
-    placeholder: String,
-    isPassword: Boolean = false,
-    keyboardType: KeyboardType = KeyboardType.Text,
-) {
-    BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        singleLine = true,
-        textStyle = TextStyle(color = Ink, fontSize = 16.sp),
-        cursorBrush = SolidColor(Accent),
-        visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-        keyboardOptions = KeyboardOptions(
-            keyboardType = keyboardType,
-            capitalization = KeyboardCapitalization.None,
-            autoCorrectEnabled = false,
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(FIELD_HEIGHT)
-            .background(Raised, RoundedCornerShape(FIELD_CORNER)),
-        decorationBox = { inner ->
-            Box(
-                modifier = Modifier.fillMaxSize().padding(horizontal = FIELD_INNER_PADDING),
-                contentAlignment = Alignment.CenterStart,
-            ) {
-                if (value.isEmpty()) {
-                    Text(placeholder, color = InkDim, fontSize = 16.sp)
-                }
-                inner()
-            }
-        },
-    )
-}
-
 private fun AuthUiState.buttonWidth() = when (mode) {
     AuthUiState.Mode.SignIn -> 150.dp
     AuthUiState.Mode.Register -> 220.dp
@@ -252,8 +204,6 @@ private val REGISTER_EMAIL_OFFSET = (-100).dp
 private val SIDE_PADDING = 30.dp
 private val FIELD_HEIGHT = 50.dp
 private val FIELD_GAP = 20.dp
-private val FIELD_CORNER = 15.dp
-private val FIELD_INNER_PADDING = 10.dp
 private val SIGN_IN_BUTTON_TOP = 50.dp
 private val REGISTER_BUTTON_TOP = 40.dp
 private val BUTTON_HEIGHT = 40.dp

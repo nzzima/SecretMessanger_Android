@@ -1,5 +1,8 @@
 package com.nzzima.secretmessanger.main.ui
 
+import com.nzzima.secretmessanger.auth.domain.FakeLoginRepository
+import com.nzzima.secretmessanger.auth.domain.FakeProfileRepository
+import com.nzzima.secretmessanger.auth.domain.impl.ProfileRepairInteractorImpl
 import com.nzzima.secretmessanger.crypto.domain.api.IdentityInteractor
 import com.nzzima.secretmessanger.crypto.domain.models.IdentityState
 import com.nzzima.secretmessanger.session.domain.FakeSessionRepository
@@ -15,6 +18,8 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertSame
+import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNotNull
 import org.junit.Before
 import org.junit.Test
 
@@ -28,11 +33,19 @@ class RootViewModelTest {
     private val sessions = FakeSessionRepository()
     private val identity = FakeIdentityInteractor()
 
+    // По умолчанию профиль у аккаунта есть: достройка — исключение, а не обычный путь.
+    private var profiles = FakeProfileRepository(mutableSetOf("uid-1"))
+    private var logins = FakeLoginRepository()
+
     @Before fun setUp() = Dispatchers.setMain(dispatcher)
 
     @After fun tearDown() = Dispatchers.resetMain()
 
-    private fun viewModel() = RootViewModel(SessionInteractorImpl(sessions, sessions), identity)
+    private fun viewModel() = RootViewModel(
+        SessionInteractorImpl(sessions, sessions),
+        identity,
+        ProfileRepairInteractorImpl(profiles, logins),
+    )
 
     private fun RootViewModel.state() = observeRootState().value
 
@@ -150,5 +163,83 @@ private class FakeIdentityInteractor : IdentityInteractor {
         overwriteFails?.let { return Result.failure(it) }
         overwritten += uid
         return Result.success(Unit)
+    }
+}
+
+/**
+ * Достройка оборванной регистрации — отдельным набором, потому что проверяет **порядок**:
+ * профиль раньше ключа. Порядок здесь не вкусовщина: публикация открытой половины пишет
+ * `users/{uid}` слиянием, и на аккаунте без профиля правило её не пропускает.
+ */
+@OptIn(ExperimentalCoroutinesApi::class)
+class RootViewModelRepairTest {
+
+    private val dispatcher = StandardTestDispatcher()
+    private val sessions = FakeSessionRepository()
+    private val identity = FakeIdentityInteractor()
+    private val profiles = FakeProfileRepository()
+    private val logins = FakeLoginRepository()
+
+    @Before fun setUp() = Dispatchers.setMain(dispatcher)
+
+    @After fun tearDown() = Dispatchers.resetMain()
+
+    private fun viewModel() = RootViewModel(
+        SessionInteractorImpl(sessions, sessions),
+        identity,
+        ProfileRepairInteractorImpl(profiles, logins),
+    )
+
+    private fun RootViewModel.state() = observeRootState().value
+
+    @Test
+    fun `аккаунт без профиля уводит на достройку и ключ не трогает`() = runTest(dispatcher) {
+        sessions.signIn("uid-1")
+        val model = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(RootState.NeedsProfile(), model.state())
+        assertEquals("ключ не должен проверяться без профиля", 0, identity.prepares)
+    }
+
+    @Test
+    fun `успешная достройка занимает логин, пишет профиль и продолжает вход`() = runTest(dispatcher) {
+        sessions.signIn("uid-1")
+        val model = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        model.repairProfile("nzzima")
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(listOf("nzzima"), logins.claimed)
+        assertSame(RootState.Ready, model.state())
+        assertEquals("после достройки ключ обязан проверяться", 1, identity.prepares)
+    }
+
+    @Test
+    fun `занятый логин возвращает на тот же экран с причиной`() = runTest(dispatcher) {
+        logins.claim("nzzima", "uid-2")
+        sessions.signIn("uid-1")
+        val model = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        model.repairProfile("nzzima")
+        dispatcher.scheduler.advanceUntilIdle()
+
+        val state = model.state()
+        assertTrue("должны остаться на достройке", state is RootState.NeedsProfile)
+        assertNotNull((state as RootState.NeedsProfile).error)
+        assertEquals(0, identity.prepares)
+    }
+
+    @Test
+    fun `аккаунт с профилем на достройку не заходит`() = runTest(dispatcher) {
+        profiles.createProfile("uid-1", "nzzima", "nzzima")
+        sessions.signIn("uid-1")
+        val model = viewModel()
+        dispatcher.scheduler.advanceUntilIdle()
+
+        assertSame(RootState.Ready, model.state())
+        assertEquals(1, identity.prepares)
     }
 }

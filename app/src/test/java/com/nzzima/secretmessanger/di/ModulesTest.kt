@@ -7,6 +7,7 @@ import com.nzzima.secretmessanger.auth.domain.api.AuthenticationInteractor
 import com.nzzima.secretmessanger.auth.domain.api.AuthenticationRepository
 import com.nzzima.secretmessanger.auth.domain.api.LoginRepository
 import com.nzzima.secretmessanger.auth.domain.api.ProfileRepository
+import com.nzzima.secretmessanger.auth.domain.api.ProfileRepairInteractor
 import com.nzzima.secretmessanger.auth.domain.api.RegistrationInteractor
 import com.nzzima.secretmessanger.auth.domain.api.RegistrationRepository
 import com.nzzima.secretmessanger.chats.domain.api.ChatsInteractor
@@ -77,6 +78,7 @@ class ModulesTest {
                 AuthenticationInteractor::class,
                 SessionInteractor::class,
                 IdentityInteractor::class,
+                ProfileRepairInteractor::class,
                 ChatsInteractor::class,
                 ContactsInteractor::class,
                 ProfileInteractor::class,
